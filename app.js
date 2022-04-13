@@ -31,6 +31,7 @@ app.use(session({
 
 // 8 - Invocamos a la conexion de la DB
 const connection = require('./database/db');
+const bcryptjs = require('bcryptjs');
 
 //9 - establecemos las rutas
 	app.get('/login',(req, res)=>{
@@ -43,12 +44,14 @@ const connection = require('./database/db');
 
 //10 - Método para la REGISTRACIÓN
 app.post('/register', async (req, res)=>{
-	const user = req.body.user;
-	const name = req.body.name;
-    const rol = req.body.rol;
-	const pass = req.body.pass;
+	const nombre = req.body.nombre;
+    const apellido = req.body.apellido;
+    const puestoAsignado = req.body.puestoAsignado;
+    const sexo = req.body.sexo;
+    const telefono = req.body.telefono;
+    const pass = req.body.pass;
 	let passwordHash = await bcrypt.hash(pass, 8);
-    connection.query('INSERT INTO users SET ?',{user:user, name:name, rol:rol, pass:passwordHash}, async (error, results)=>{
+    connection.query('INSERT INTO empleado SET ?',{nombre:nombre, apellido:apellido, puestoAsignado:puestoAsignado, sexo:sexo, telefono:telefono, pass:passwordHash}, async (error, results)=>{
         if(error){
             console.log(error);
         }else{            
@@ -70,12 +73,14 @@ app.post('/register', async (req, res)=>{
 
 //11 - Metodo para la autenticacion
 app.post('/auth', async (req, res)=> {
-	const user = req.body.user;
+	// const user = req.body.user;
+	// const id = req.body.id;
+	const user = req.body.nombre;
 	const pass = req.body.pass;    
-    let passwordHash = await bcrypt.hash(pass, 8);
+    let passwordHash = await bcryptjs.hash(pass, 8);
 	if (user && pass) {
-		connection.query('SELECT * FROM users WHERE user = ?', [user], async (error, results, fields)=> {
-			if( results.length == 0 || !(await bcrypt.compare(pass, results[0].pass)) ) {    
+		connection.query('SELECT * FROM empleado WHERE nombre = ?', [user], async (error, results, fields)=> {
+			if( results.length == 0 || !(await bcryptjs.compare(pass, results[0].pass)) ) {    
 				res.render('login', {
                         alert: true,
                         alertTitle: "Error",
